@@ -8,6 +8,7 @@ from torch.utils.data import Dataset, DataLoader
 from transformers import BertTokenizer, BertForSequenceClassification
 from torch.optim import AdamW
 from tqdm import tqdm
+import os
 
 # dataset class
 class SentimentDataset(Dataset):
@@ -172,7 +173,11 @@ def main():
     parser.add_argument('--window_size', type=int, default=2, help="Window size for naive mode")
     parser.add_argument('--top_k', type=int, default=2, help="Number of top contrastive sentences for contrastive modes")
     parser.add_argument('--max_length', type=int, default=256, help="Max token length for BERT inputs")
+    parser.add_argument('--output_dir', type=str, default='results', help="Directory to save results and errors")
     args = parser.parse_args()
+
+    # create output directory if not exists
+    os.makedirs(args.output_dir, exist_ok=True)
 
     # load data
     df = pd.read_csv(args.data_path)
@@ -191,6 +196,7 @@ def main():
     precisions = []
     recalls = []
     f1s = []
+    fold_results = []
 
     print(f"Starting {args.kfold}-fold cross-validation with mode={args.mode}")
 
@@ -222,7 +228,7 @@ def main():
             train_loss = train_epoch(model, train_loader, optimizer, device)
             print(f"Train loss: {train_loss:.4f}")
 
-        error_path = f"errors_fold{fold+1}_{args.mode}.csv"
+        error_path = os.path.join(args.output_dir, f"{args.mode}_errors_fold{fold+1}.csv")
         precision, recall, f1 = eval_model(
             model,
             val_loader,
@@ -238,10 +244,22 @@ def main():
         recalls.append(recall)
         f1s.append(f1)
 
+        fold_results.append({
+            'mode': args.mode,
+            'fold': fold + 1,
+            'precision': precision,
+            'recall': recall,
+            'f1': f1
+        })
+
     print("\nCross-validation results:")
     print(f"Average Precision: {np.mean(precisions):.4f}")
     print(f"Average Recall: {np.mean(recalls):.4f}")
     print(f"Average F1: {np.mean(f1s):.4f}")
+
+    results_df = pd.DataFrame(fold_results)
+    results_csv_path = os.path.join(args.output_dir, f"{args.mode}_metrics.csv")
+    results_df.to_csv(results_csv_path, index=False)
 
 if __name__ == "__main__":
     main()
