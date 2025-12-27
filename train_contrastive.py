@@ -14,11 +14,11 @@ class SentimentDataset(Dataset):
     def __init__(self, df, mode, tokenizer, max_length=256, window_size=2, top_k=2):
         """
         df: DataFrame containing the data for one fold
-        mode: 'sentence', 'naive', or 'contrastive'
+        mode: 'sentence', 'naive', 'contrastive-max', 'contrastive-min', or 'random'
         tokenizer: BERT tokenizer
         max_length: max token length for BERT inputs
         window_size: fixed window size for naive mode (±k sentences)
-        top_k: number of contrastive sentences for contrastive mode
+        top_k: number of contrastive sentences for contrastive modes
         """
         self.df = df.reset_index(drop=True)
         self.mode = mode
@@ -27,14 +27,19 @@ class SentimentDataset(Dataset):
         self.window_size = window_size
         self.top_k = top_k
 
-        # Group by article for context retrieval
-        self.articles = self.df.groupby('article_id')
+        # Group by article for context retrieval with sorted and reset index
+        self.articles = {
+            article_id: group
+                .sort_values('sentence_index')
+                .reset_index(drop=True)
+            for article_id, group in self.df.groupby('article_id')
+        }
 
-        # Precompute sentiment scores per article for contrastive mode
-        if mode == 'contrastive':
+        # Precompute sentiment scores per article for contrastive modes
+        if mode in ['contrastive-max', 'contrastive-min']:
             # For each article, get sentiment scores as numpy array for fast access
             self.sentiment_scores = {}
-            for article_id, group in self.articles:
+            for article_id, group in self.articles.items():
                 self.sentiment_scores[article_id] = group['sentiment'].values
 
     def __len__(self):
@@ -55,22 +60,37 @@ class SentimentDataset(Dataset):
 
         elif self.mode == 'naive':
             # Fixed window ±k sentences around target in the same article
-            group = self.articles.get_group(article_id)
+            group = self.articles[article_id]
+            assert group.iloc[target_idx]['sentence_index'] == target_idx, \
+                f"Sentence index mismatch in article {article_id}"
             start = max(target_idx - self.window_size, 0)
             end = min(target_idx + self.window_size + 1, len(group))
-            context_sents = group.loc[start:end-1, 'sentence'].tolist()
+            context_sents = group.iloc[start:end]['sentence'].tolist()
             text = " ".join(context_sents)
 
-        elif self.mode == 'contrastive':
-            # Select top-k sentences in the article with highest sentiment contrast to target
-            group = self.articles.get_group(article_id)
-            target_score = self.sentiment_scores[article_id][target_idx]
-            # Compute absolute difference of sentiment scores
-            diffs = np.abs(self.sentiment_scores[article_id] - target_score)
-            # Exclude the target sentence itself
-            diffs[target_idx] = -1
-            # Get indices of top-k sentences with highest contrast
-            top_indices = diffs.argsort()[-self.top_k:]
+        elif self.mode in ['contrastive-max', 'contrastive-min', 'random']:
+            group = self.articles[article_id]
+            assert group.iloc[target_idx]['sentence_index'] == target_idx, \
+                f"Sentence index mismatch in article {article_id}"
+
+            if self.mode == 'random':
+                candidates = group['sentence_index'].tolist()
+                candidates.remove(target_idx)
+                top_indices = np.random.choice(
+                    candidates,
+                    size=min(self.top_k, len(candidates)),
+                    replace=False
+                )
+            else:
+                target_score = self.sentiment_scores[article_id][target_idx]
+                diffs = np.abs(self.sentiment_scores[article_id] - target_score)
+                diffs[target_idx] = np.inf
+
+                if self.mode == 'contrastive-max':
+                    top_indices = diffs.argsort()[-self.top_k:]
+                else:  # contrastive-min
+                    top_indices = diffs.argsort()[:self.top_k]
+
             top_indices = np.sort(top_indices)
 
             contrastive_sents = (
@@ -78,8 +98,7 @@ class SentimentDataset(Dataset):
                 .sort_values('sentence_index')['sentence']
                 .tolist()
             )
-# Combine target sentence with contrastive context sentences
-            # We separate sentences by [SEP] token for clarity to BERT
+
             text = target_sentence + " [SEP] " + " [SEP] ".join(contrastive_sents)
 
         else:
@@ -115,7 +134,7 @@ def train_epoch(model, dataloader, optimizer, device):
         losses.append(loss.item())
     return np.mean(losses)
 
-def eval_model(model, dataloader, device):
+def eval_model(model, dataloader, device, eval_df, save_path=None):
     model.eval()
     preds = []
     trues = []
@@ -130,20 +149,37 @@ def eval_model(model, dataloader, device):
             preds.extend(predictions.cpu().numpy())
             trues.extend(labels.cpu().numpy())
     precision, recall, f1, _ = precision_recall_fscore_support(trues, preds, pos_label=1, average='binary')
+
+    errors = []
+    for i, (y_true, y_pred) in enumerate(zip(trues, preds)):
+        if y_true != y_pred:
+            row = eval_df.iloc[i]
+            errors.append({
+                'article_id': row['article_id'],
+                'sentence_index': row['sentence_index'],
+                'sentence': row['sentence'],
+                'sentiment': row['sentiment'],
+                'gold_label': y_true,
+                'pred_label': y_pred
+            })
+
+    if save_path is not None and len(errors) > 0:
+        pd.DataFrame(errors).to_csv(save_path, index=False)
+
     return precision, recall, f1
 
 def main():
     parser = argparse.ArgumentParser(description="Contrastive Sentiment Context Bias Detection Training")
     parser.add_argument('--data_path', type=str, required=True,
                         help="Path to preprocessed CSV file")
-    parser.add_argument('--mode', type=str, choices=['sentence', 'naive', 'contrastive'], default='sentence',
-                        help="Input mode: sentence, naive, or contrastive")
+    parser.add_argument('--mode', type=str, choices=['sentence', 'naive', 'contrastive-max', 'contrastive-min', 'random'], default='sentence',
+                        help="Input mode: sentence, naive, contrastive-max, contrastive-min, or random")
     parser.add_argument('--epochs', type=int, default=3, help="Number of training epochs")
     parser.add_argument('--batch_size', type=int, default=16, help="Batch size")
     parser.add_argument('--lr', type=float, default=2e-5, help="Learning rate")
     parser.add_argument('--kfold', type=int, default=5, help="Number of folds for cross-validation")
     parser.add_argument('--window_size', type=int, default=2, help="Window size for naive mode")
-    parser.add_argument('--top_k', type=int, default=2, help="Number of top contrastive sentences for contrastive mode")
+    parser.add_argument('--top_k', type=int, default=2, help="Number of top contrastive sentences for contrastive modes")
     parser.add_argument('--max_length', type=int, default=256, help="Max token length for BERT inputs")
     args = parser.parse_args()
 
@@ -203,7 +239,14 @@ def main():
             train_loss = train_epoch(model, train_loader, optimizer, device)
             print(f"Train loss: {train_loss:.4f}")
 
-        precision, recall, f1 = eval_model(model, val_loader, device)
+        error_path = f"errors_fold{fold+1}_{args.mode}.csv"
+        precision, recall, f1 = eval_model(
+            model,
+            val_loader,
+            device,
+            val_df.reset_index(drop=True),
+            save_path=error_path
+        )
         print(f"Validation Precision (biased class): {precision:.4f}")
         print(f"Validation Recall (biased class): {recall:.4f}")
         print(f"Validation F1 (biased class): {f1:.4f}")

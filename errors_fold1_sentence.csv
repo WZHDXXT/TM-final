@@ -1,0 +1,72 @@
+article_id,sentence_index,sentence,sentiment,gold_label,pred_label
+0,4,"Roughly 270,000 people downloaded and shared personal details with the app.",0.34,0,1
+0,10,Kogan did not immediately reply to an emailed request for comment.,0.0,1,0
+0,11,Wylie could not immediately be located.,0.0,1,0
+0,19,We pay for your stories!,-0.1759,1,0
+5,1,"Details of Johnson's alleged misbehavior were uncovered by the Kentucky Center for Investigative Reporting, a Louisville-based journalism non-profit, in an expos챕 called The Pope's Long Con.",0.0,0,1
+5,2,The report detailed Johnson as embroiled in a web of lies and deceit and described his role in a mysterious fire and the sexual misconduct.,-0.802,0,1
+5,3,"According to the report, Johnson allegedly molested a 17-year-old girl staying at a living area of the Heart of Fire City Church where he was a pastor.",-0.6486,0,1
+5,4,The teen told authorities that he approached her on New Year's Eve in 2012 while she slept.,0.0,0,1
+5,6,"Although police did not charge him with a crime after the teen reported it in 2013, they re-opened an investigation into the matter on Tuesday.",-0.5267,1,0
+5,8,"Despite the calls, Johnson held a press conference where he refused to step down and then dismissed the report as ""fake news"" in a suicide note posted to Facebook.",-0.8689,0,1
+5,9,Deputies with the Bullitt County Sheriff's Office found Johnson's body in front of his car on the bridge where he had killed himself.,-0.6705,0,1
+5,10,The county coroner determined Johnson died of a self-inflicted gunshot wound to the head.,-0.296,0,1
+5,11,"The news report raised doubt about Johnson's personal history such as documents claiming he performed miracles on mission trips, set up safe zones during the 1992 LA riots, served as chaplain in the White House under Presidents Bill Clinton and Geor",-0.4404,0,1
+5,12,"He boasted about these acts during his campaign last year, but no record or person could corroborate his story.",-0.4215,0,1
+5,13,"The report also cast doubt on Johnson's claim that he witnessed the 9/11 attacks in New York, served as a clergy following the chaos and set up morgues in the rubble.",-0.8442,0,1
+5,15,"Yet, city officials and public documents failed to support his narrative.",-0.1531,0,1
+5,16,Johnson shared the aforementioned details with Guns.com in brief interviews and even appeared in the book We The People.,0.34,0,1
+5,17,"In June 2016, Guns.com published his famous ""gun choir"" in a video in which he sang Amazing Grace with members of his congregation while sporting pistols and rifles.",0.6369,0,1
+5,18,"Michael Skoler, the president of Louisville Public Media, which owns the Kentucky Center for Investigative Reporting, released a statement saying how sorry they were to hear of Johnson's death.",-0.6369,0,1
+5,19,"He defended his center's article: ""Our aim, as always, is to provide the public with fact-based, un3 reporting and hold public officials accountable for their actions.""",0.0,0,1
+6,0,"Massachusetts Attorney General Maura Healey is launching a probe into British-based Cambridge Analytica, a data-analysis firm that worked for President Trump's 2016 campaign, over allegations that it held onto improperly obtained user data after tell",0.0,0,1
+6,1,"""Massachusetts residents deserve answers immediately from Facebook and Cambridge Analytica,"" Healey said in a post on Twitter yesterday.",0.0,0,1
+6,3,"Healey's office has already reached out to Facebook to determine what data was accessed, how it was used, and whether Bay State residents were impacted.",0.1027,0,1
+6,4,Healey's announcement came hours after the social network issued a blog post explaining its decision to suspended the firm.,-0.4767,0,1
+6,5,"Years ago, Facebook said, Cambridge Analytica received user data from a Facebook app that purported to be a psychological research tool, though the firm wasn't authorized to have that information.",0.0,0,1
+6,6,"About 270,000 people downloaded the app and shared their personal details with it, Facebook said.",0.34,0,1
+6,7,"Cambridge Analytica later certified in 2015 that it had destroyed the information that it received, according to Facebook, although the social network said it received reports ""several days ago"" that not all of the data was deleted.",-0.4939,0,1
+6,8,"While it investigates the matter, Facebook has also suspended the access of Cambridge Analytica's parent company, Strategic Communication Laboratories; the academic who created the app in question, a University of Cambridge psychology professor named",-0.25,0,1
+6,10,"The blog post, written by Facebook deputy general counsel Paul Grewal, cited the ""public prominence"" of Cambridge Analytica, called the alleged data retention an ""unacceptable violation of trust"" and said the social network will take legal action if",-0.34,0,1
+6,11,"In a statement, a Cambridge Analytica spokesman denied any wrongdoing.",-0.4404,1,0
+6,13,"For the ""avoidance of doubt,"" the spokesman said, none of Kogan's data was used in Cambridge Analytica's 2016 election work.",-0.4019,0,1
+6,16,Cambridge Analytica CEO Alexander Nix also disclosed in November that the company reached out to WikiLeaks founder Julian Assange during the campaign to request emails related to the Hillary Clinton campaign.,0.1027,0,1
+12,2,"After a lengthy pause, Trump stared grimly into the distance, and then unleashed a winding, unhinged spiel about NFL players who kneeled during the National Anthem.",-0.3182,0,1
+12,3,"He asked the assembled crowd, ""Wouldn't you love to see one of these NFL owners, when somebody disrespects our flag, to say, 'get that son of a bitch off the field right now.",-0.8002,1,0
+12,6,"Trump didn't stop there, waxing nostalgic about the NFL of yore, when men-real men-could inflict permanent damage on one another without worrying about those pesky concussive and subconcussive blows to the head and long-term cognitive diseases, sound",-0.3561,1,0
+12,10,"""I guarantee things will stop,"" he said.",0.25,0,1
+12,12,Pick up and leave.,-0.0516,0,1
+12,14,Trump's anti-NFL comments in Huntsville were just the beginning.,0.0,1,0
+12,18,He said outright that he had no intention of serving as Trump's grinning prop.,0.0772,0,1
+18,7,"""This allegation concerning this lady, this young girl, absolutely has no merit, these are unfounded accusations, totally,"" he said.",-0.1815,0,1
+18,9,"""I cannot handle it any longer .",0.0,1,0
+18,12,KCIP found that Johnson's claim that he had brought a dead woman back to life while serving as a missionary in South America was based on a letter written by another preacher who admitted he hadn't seen the supposed miracle and only heard about it.,-0.0258,0,1
+18,13,"And while the Kentucky reporters found records that placed Johnson in New York City on or around 9/11, it's unlikely he watched a plane crash into one of the Twin Towers from ""The New Yorker Hotel,"" as he claimed on the web site.",-0.4019,0,1
+18,15,"It's about three miles north of Ground Zero, in Midtown Manhattan.",0.0,1,0
+18,16,"Before his suicide, Johnson made national news during his campaign for posting racist remarks online about former President Barack Obama and Michelle Obama.",-0.8591,1,0
+18,17,That didn't stop him from getting elected last year in an overwhelmingly white and conservative corner of Kentucky.,0.0997,1,0
+18,18,"Johnson claimed to have a ""doctorate of divinity"" from a Des Moines, Iowa, bible school.",0.5719,0,1
+35,0,"The wife of Kentucky State Rep. Dan Johnson, who killed himself on Wednesday amid a bombshell report's accusations of sexual assault, announced Thursday that she would pursue her husband's seat, saying ""his fight will go on.""",-0.9217,1,0
+35,1,"Dan Johnson, a preacher and a Republican, committed suicide Wednesday on a bridge in Mt.",-0.5267,1,0
+35,5,"""Dan is gone but the story of his life is far from over,"" she said.",0.0,1,0
+35,7,"The lawmaker denied the accusations on Tuesday, calling them ""totally false.""",-0.6369,1,0
+35,8,"He said they were part of a nationwide strategy for defeating conservative Republicans, referencing claims also made against Republican Alabama Senate candidate Roy Moore.",-0.3818,0,1
+35,11,"It has won this life, BUT HEAVEN IS MY HOME.""",0.836,1,0
+35,13,"The woman who made the accusations against Dan Johnson, Maranda Richmond, said she attended a New Year's Eve party at his house in 2012.",0.1027,1,0
+35,15,Richmond said that she reported the episode but Louisville police closed the case without charges.,0.3007,1,0
+35,17,"Johnson was elected to the State Legislature in 2016, part of a wave of Republican victories that gave the GOP control of the Kentucky House of Representatives for the first time in nearly 100 years.",0.0,1,0
+40,0,"""Dan is gone,"" says Rebecca Johnson, wife of deceased Kentucky state rep Dan Johnson, ""but the story of his life is far from over.""",0.0,0,1
+40,1,Rep. Dan Johnson took his life on a bridge in Mt.,0.0,1,0
+40,4,RELATED: An investigation into a state lawmaker accused of child molestation has ended with a single gunshot,-0.6249,1,0
+40,6,An investigation by the Kentucky Center for Investigative Reporting found that a case to the allegations was closed.,0.0,0,1
+40,7,"Following their report and an on-the-record interview with alleged victim Maranda Richmond, who is now 21, police reopened the case.",-0.2732,0,1
+40,8,No charges were filed before Johnson took his life.,-0.5106,0,1
+40,9,"""These high-tech lynchings based on lies and half-truths can't be allowed to win the day,"" said Rebecca Johnson, who stood by her husband's side as he dismissed the molestation allegations in a press conference on Tuesday.",-0.2263,0,1
+40,10,"That press conference saw Rep. Johnson say he was ""mad as can be"" about the charges, which he said were made into ""political stones and political rocks.""",-0.6486,1,0
+40,11,"He said the allegations against him were ""something that's totally false.""",0.0,0,1
+40,12,"Rebecca Johnson says she has stood by her husband's side for 30 years and plans to continue his ""fight.""",0.0,0,1
+40,15,"All of us at Louisville Public Media are deeply sad to hear that State Representative Dan Johnson has died, apparently of suicide.",-0.9099,0,1
+45,0,"Tillerson Makes A N. Korea Overture, But It Highlights His Credibility Problem",-0.5499,0,1
+45,7,"""We can talk about the weather if you want,"" Tillerson said, in his overture to North Korea.",0.0,0,1
+45,14,"He says this is just posturing from Tillerson because the U.S. can't effectively say it wants to talk when its goal is complete, verifiable denuclearization by North Korea.",-0.3412,0,1
+45,19,"""It really depends whether North Korea stops testing and comes to the bargaining table to talk, or they continue to test and [show they're] not going to engage in any talks at this time,"" Kim says.",-0.3891,0,1
