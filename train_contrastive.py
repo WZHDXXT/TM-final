@@ -9,17 +9,9 @@ from transformers import BertTokenizer, BertForSequenceClassification
 from torch.optim import AdamW
 from tqdm import tqdm
 
-# Dataset class to handle different input modes
+# dataset class
 class SentimentDataset(Dataset):
     def __init__(self, df, mode, tokenizer, max_length=256, window_size=2, top_k=2):
-        """
-        df: DataFrame containing the data for one fold
-        mode: 'sentence', 'naive', 'contrastive-max', 'contrastive-min', or 'random'
-        tokenizer: BERT tokenizer
-        max_length: max token length for BERT inputs
-        window_size: fixed window size for naive mode (±k sentences)
-        top_k: number of contrastive sentences for contrastive modes
-        """
         self.df = df.reset_index(drop=True)
         self.mode = mode
         self.tokenizer = tokenizer
@@ -27,7 +19,7 @@ class SentimentDataset(Dataset):
         self.window_size = window_size
         self.top_k = top_k
 
-        # Group by article for context retrieval with sorted and reset index
+        # group by article
         self.articles = {
             article_id: group
                 .sort_values('sentence_index')
@@ -35,9 +27,8 @@ class SentimentDataset(Dataset):
             for article_id, group in self.df.groupby('article_id')
         }
 
-        # Precompute sentiment scores per article for contrastive modes
+        # sentiment scores
         if mode in ['contrastive-max', 'contrastive-min']:
-            # For each article, get sentiment scores as numpy array for fast access
             self.sentiment_scores = {}
             for article_id, group in self.articles.items():
                 self.sentiment_scores[article_id] = group['sentiment'].values
@@ -51,18 +42,17 @@ class SentimentDataset(Dataset):
         target_idx = row['sentence_index']
         label = int(row['biased'])
 
-        # Sentence text
+        # sentence text
         target_sentence = row['sentence']
 
         if self.mode == 'sentence':
-            # Only target sentence
             text = target_sentence
 
         elif self.mode == 'naive':
-            # Fixed window ±k sentences around target in the same article
+            # window ±k sentences around target in the same article
             group = self.articles[article_id]
             assert group.iloc[target_idx]['sentence_index'] == target_idx, \
-                f"Sentence index mismatch in article {article_id}"
+                f"sentence index mismatch in article {article_id}"
             start = max(target_idx - self.window_size, 0)
             end = min(target_idx + self.window_size + 1, len(group))
             context_sents = group.iloc[start:end]['sentence'].tolist()
@@ -71,11 +61,12 @@ class SentimentDataset(Dataset):
         elif self.mode in ['contrastive-max', 'contrastive-min', 'random']:
             group = self.articles[article_id]
             assert group.iloc[target_idx]['sentence_index'] == target_idx, \
-                f"Sentence index mismatch in article {article_id}"
+                f"sentence index mismatch in article {article_id}"
 
             if self.mode == 'random':
                 candidates = group['sentence_index'].tolist()
                 candidates.remove(target_idx)
+                # random selection
                 top_indices = np.random.choice(
                     candidates,
                     size=min(self.top_k, len(candidates)),
@@ -102,9 +93,9 @@ class SentimentDataset(Dataset):
             text = target_sentence + " [SEP] " + " [SEP] ".join(contrastive_sents)
 
         else:
-            raise ValueError(f"Unknown mode: {self.mode}")
+            raise ValueError(f"unknown mode: {self.mode}")
 
-        # Tokenize
+        # tokenize
         encoding = self.tokenizer(
             text,
             max_length=self.max_length,
@@ -175,7 +166,7 @@ def main():
     parser.add_argument('--mode', type=str, choices=['sentence', 'naive', 'contrastive-max', 'contrastive-min', 'random'], default='sentence',
                         help="Input mode: sentence, naive, contrastive-max, contrastive-min, or random")
     parser.add_argument('--epochs', type=int, default=3, help="Number of training epochs")
-    parser.add_argument('--batch_size', type=int, default=16, help="Batch size")
+    parser.add_argument('--batch_size', type=int, default=64, help="Batch size")
     parser.add_argument('--lr', type=float, default=2e-5, help="Learning rate")
     parser.add_argument('--kfold', type=int, default=5, help="Number of folds for cross-validation")
     parser.add_argument('--window_size', type=int, default=2, help="Window size for naive mode")
@@ -183,17 +174,9 @@ def main():
     parser.add_argument('--max_length', type=int, default=256, help="Max token length for BERT inputs")
     args = parser.parse_args()
 
-    # Load data
+    # load data
     df = pd.read_csv(args.data_path)
 
-    # We expect the dataframe to have columns:
-    # 'article_id' (int or str): unique article identifier
-    # 'sentence_index' (int): sentence index within article (0-based)
-    # 'sentence' (str): text of the sentence
-    # 'sentiment' (float): sentiment score of the sentence (e.g., from -1 to 1)
-    # 'biased' (int): 0/1 label for bias presence
-
-    # Ensure required columns exist
     required_cols = ['article_id', 'sentence_index', 'sentence', 'sentiment', 'biased']
     for col in required_cols:
         if col not in df.columns:
