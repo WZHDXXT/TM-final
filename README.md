@@ -55,6 +55,43 @@ The training script supports multiple context strategies:
 
 ---
 
+## Usage
+
+Run training with different context selection strategies by specifying the `mode` argument.
+
+```bash
+# Sentence-only baseline (no context)
+python train_contrastive.py \
+  --data_path data/basil_sentiment_analysis.csv \
+  --mode sentence
+
+# Naive window-based context
+python train_contrastive.py \
+  --data_path data/basil_sentiment_analysis.csv \
+  --mode naive \
+  --window_size 2
+
+# Contrastive sentiment context (maximum contrast)
+python train_contrastive.py \
+  --data_path data/basil_sentiment_analysis.csv \
+  --mode contrastive-max \
+  --top_k 2
+
+# Contrastive sentiment context (minimum contrast)
+python train_contrastive.py \
+  --data_path data/basil_sentiment_analysis.csv \
+  --mode contrastive-min \
+  --top_k 2
+
+# Randomly sampled context (control baseline)
+python train_contrastive.py \
+  --data_path data/basil_sentiment_analysis.csv \
+  --mode random \
+  --top_k 2
+```
+
+---
+
 ## Notes
 
 - All context is retrieved **within the same article** to avoid data leakage.
