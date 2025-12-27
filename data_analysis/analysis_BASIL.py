@@ -135,7 +135,7 @@ def compute_window_contrast(df, window_size=3):
 # =========================
 
 def main():
-    basil_dir = "./BASIL"  # 修改为你的 BASIL 路径
+    basil_dir = "../BASIL"
 
     print("Loading BASIL articles...")
     articles = load_basil_articles(basil_dir)

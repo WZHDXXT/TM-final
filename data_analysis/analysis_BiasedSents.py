@@ -137,7 +137,7 @@ def compute_window_contrast(df, window_size=3):
 # =========================
 
 def main():
-    biasedsents_dir = "./BiasedSents"  # 修改为你的 BiasedSents 路径
+    biasedsents_dir = "../BiasedSents"  
 
     print("Loading BiasedSents articles...")
     articles = load_biasedsents_articles(biasedsents_dir)
