@@ -57,7 +57,7 @@ class SentimentDataset(Dataset):
             start = max(target_idx - self.window_size, 0)
             end = min(target_idx + self.window_size + 1, len(group))
             context_sents = group.iloc[start:end]['sentence'].tolist()
-            text = " ".join(context_sents)
+            text = "[TARGET] " + target_sentence + " [SEP] [CONTEXT] " + " [SEP] ".join(context_sents)
 
         elif self.mode in ['contrastive-max', 'contrastive-min', 'random']:
             group = self.articles[article_id]
@@ -91,7 +91,7 @@ class SentimentDataset(Dataset):
                 .tolist()
             )
 
-            text = target_sentence + " [SEP] " + " [SEP] ".join(contrastive_sents)
+            text = "[TARGET] " + target_sentence + " [SEP] [CONTEXT] " + " [SEP] ".join(contrastive_sents)
 
         else:
             raise ValueError(f"unknown mode: {self.mode}")
@@ -104,7 +104,7 @@ class SentimentDataset(Dataset):
             truncation=True,
             return_tensors='pt'
         )
-        # Return input_ids, attention_mask and label
+
         return {
             'input_ids': encoding['input_ids'].squeeze(0),
             'attention_mask': encoding['attention_mask'].squeeze(0),
