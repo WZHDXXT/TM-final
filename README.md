@@ -70,8 +70,7 @@ python train_contrastive.py \
 # Naive window-based context
 python train_contrastive.py \
   --data_path data_analysis/basil_sentiment_analysis.csv \
-  --mode naive \
-  --window_size 2
+  --mode naive 
 
 # Contrastive sentiment context (maximum sentiment contrast)
 python train_contrastive.py \
