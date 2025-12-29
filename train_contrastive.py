@@ -29,7 +29,7 @@ class SentimentDataset(Dataset):
         }
 
         # sentiment scores
-        if mode in ['contrastive-max', 'contrastive-min']:
+        if mode == 'contrastive':
             self.sentiment_scores = {}
             for article_id, group in self.articles.items():
                 self.sentiment_scores[article_id] = group['sentiment'].values
@@ -59,7 +59,7 @@ class SentimentDataset(Dataset):
             context_sents = group.iloc[start:end]['sentence'].tolist()
             text = "[TARGET] " + target_sentence + " [SEP] [CONTEXT] " + " [SEP] ".join(context_sents)
 
-        elif self.mode in ['contrastive-max', 'contrastive-min', 'random']:
+        elif self.mode in ['contrastive', 'random']:
             group = self.articles[article_id]
             assert group.iloc[target_idx]['sentence_index'] == target_idx, \
                 f"sentence index mismatch in article {article_id}"
@@ -78,10 +78,8 @@ class SentimentDataset(Dataset):
                 diffs = np.abs(self.sentiment_scores[article_id] - target_score)
                 diffs[target_idx] = np.inf
 
-                if self.mode == 'contrastive-max':
+                if self.mode == 'contrastive':
                     top_indices = diffs.argsort()[-self.top_k:]
-                else:  # contrastive-min
-                    top_indices = diffs.argsort()[:self.top_k]
 
             top_indices = np.sort(top_indices)
 
@@ -164,8 +162,8 @@ def main():
     parser = argparse.ArgumentParser(description="Contrastive Sentiment Context Bias Detection Training")
     parser.add_argument('--data_path', type=str, required=True,
                         help="Path to preprocessed CSV file")
-    parser.add_argument('--mode', type=str, choices=['sentence', 'naive', 'contrastive-max', 'contrastive-min', 'random'], default='sentence',
-                        help="Input mode: sentence, naive, contrastive-max, contrastive-min, or random")
+    parser.add_argument('--mode', type=str, choices=['sentence', 'naive', 'contrastive', 'random'], default='sentence',
+                        help="Input mode: sentence, naive, contrastive, or random")
     parser.add_argument('--epochs', type=int, default=3, help="Number of training epochs")
     parser.add_argument('--batch_size', type=int, default=64, help="Batch size")
     parser.add_argument('--lr', type=float, default=2e-5, help="Learning rate")
@@ -176,7 +174,6 @@ def main():
     parser.add_argument('--output_dir', type=str, default='results', help="Directory to save results and errors")
     args = parser.parse_args()
 
-    # create output directory if not exists
     os.makedirs(args.output_dir, exist_ok=True)
 
     # load data
@@ -200,6 +197,7 @@ def main():
 
     print(f"Starting {args.kfold}-fold cross-validation with mode={args.mode}")
 
+    # training
     for fold, (train_idx, val_idx) in enumerate(gkf.split(df, groups=articles)):
         print(f"\nFold {fold+1}/{args.kfold}")
 
@@ -252,6 +250,7 @@ def main():
             'f1': f1
         })
 
+    # final evaluation
     print("\nCross-validation results:")
     print(f"Average Precision: {np.mean(precisions):.4f}")
     print(f"Average Recall: {np.mean(recalls):.4f}")

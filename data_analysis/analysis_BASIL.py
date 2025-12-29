@@ -6,21 +6,12 @@ import numpy as np
 import nltk
 from nltk.sentiment import SentimentIntensityAnalyzer
 
-# =========================
-# 0. Setup
-# =========================
-
 nltk.download("vader_lexicon")
 sia = SentimentIntensityAnalyzer()
 
-
-# =========================
-# 1. Load BASIL JSON files
-# =========================
-
 def load_basil_articles(basil_dir):
     """
-    Load all BASIL json files from a directory.
+    load BASIL json files
     """
     articles = []
     for fname in os.listdir(basil_dir):
@@ -32,13 +23,9 @@ def load_basil_articles(basil_dir):
     return articles
 
 
-# =========================
-# 2. Convert to sentence-level DataFrame
-# =========================
-
 def basil_to_sentences(articles):
     """
-    Convert BASIL articles to sentence-level records.
+    convert BASIL articles to sentence-level records
     """
     rows = []
 
@@ -52,7 +39,7 @@ def basil_to_sentences(articles):
             idx = sent["sentence-index"]
             annotations = sent.get("annotations", [])
 
-            # Binary bias label
+            # binary label
             is_biased = 1 if len(annotations) > 0 else 0
 
             rows.append({
@@ -68,13 +55,10 @@ def basil_to_sentences(articles):
     return pd.DataFrame(rows)
 
 
-# =========================
-# 3. Sentiment computation
-# =========================
 
 def compute_sentiment(df):
     """
-    Add VADER compound sentiment score.
+    VADER compound sentiment score
     """
     df["sentiment"] = df["sentence"].apply(
         lambda x: sia.polarity_scores(x)["compound"]
@@ -82,13 +66,9 @@ def compute_sentiment(df):
     return df
 
 
-# =========================
-# 4. Contrast features
-# =========================
-
 def compute_article_level_contrast(df):
     """
-    Compute article-level mean sentiment and deviation.
+    article-level mean sentiment and deviation
     """
     article_mean = (
         df.groupby("article_id")["sentiment"]
@@ -106,7 +86,7 @@ def compute_article_level_contrast(df):
 
 def compute_window_contrast(df, window_size=3):
     """
-    Compute local window sentiment contrast.
+    local window sentiment contrast
     """
     df = df.sort_values(["article_id", "sentence_index"])
     window_devs = []
@@ -130,10 +110,6 @@ def compute_window_contrast(df, window_size=3):
     return df
 
 
-# =========================
-# 5. Main
-# =========================
-
 def main():
     basil_dir = "../BASIL"
 
@@ -152,10 +128,6 @@ def main():
 
     print("Computing window-level contrast...")
     df = compute_window_contrast(df, window_size=3)
-
-    # =========================
-    # 6. Basic statistics output
-    # =========================
 
     print("\n=== Dataset Statistics ===")
     print(df["biased"].value_counts())

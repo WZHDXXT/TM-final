@@ -5,22 +5,13 @@ import pandas as pd
 import nltk
 from nltk.sentiment import SentimentIntensityAnalyzer
 
-# =========================
-# 0. Setup
-# =========================
-
 nltk.download("vader_lexicon")
 sia = SentimentIntensityAnalyzer()
 
 
-# =========================
-# 1. Load BiasedSents JSON files
-# =========================
-
 def load_biasedsents_articles(biasedsents_dir):
     """
-    Load all BiasedSents json files from a directory.
-    Each file corresponds to one article.
+    load BiasedSents json files
     """
     articles = []
     for fname in os.listdir(biasedsents_dir):
@@ -31,14 +22,9 @@ def load_biasedsents_articles(biasedsents_dir):
                 articles.append(data)
     return articles
 
-
-# =========================
-# 2. Convert to sentence-level DataFrame
-# =========================
-
 def biasedsents_to_sentences(articles):
     """
-    Convert BiasedSents articles to sentence-level records.
+    convert BiasedSents articles to sentence-level records
     """
     rows = []
 
@@ -68,14 +54,9 @@ def biasedsents_to_sentences(articles):
 
     return pd.DataFrame(rows)
 
-
-# =========================
-# 3. Sentiment computation
-# =========================
-
 def compute_sentiment(df):
     """
-    Add VADER compound sentiment score.
+    VADER compound sentiment score
     """
     df["sentiment"] = df["sentence"].apply(
         lambda x: sia.polarity_scores(x)["compound"]
@@ -83,13 +64,9 @@ def compute_sentiment(df):
     return df
 
 
-# =========================
-# 4. Contrast features
-# =========================
-
 def compute_article_level_contrast(df):
     """
-    Compute article-level mean sentiment and deviation.
+    article-level mean sentiment and deviation
     """
     article_mean = (
         df.groupby("article_id")["sentiment"]
@@ -107,7 +84,7 @@ def compute_article_level_contrast(df):
 
 def compute_window_contrast(df, window_size=3):
     """
-    Compute local window sentiment contrast.
+    local window sentiment contrast
     """
     df = df.sort_values(["article_id", "sentence_index"])
     window_devs = []
@@ -131,10 +108,6 @@ def compute_window_contrast(df, window_size=3):
     return df
 
 
-# =========================
-# 5. Main
-# =========================
-
 def main():
     biasedsents_dir = "../BiasedSents"  
 
@@ -153,10 +126,6 @@ def main():
 
     print("Computing window-level contrast...")
     df = compute_window_contrast(df, window_size=3)
-
-    # =========================
-    # 6. Basic statistics output
-    # =========================
 
     print("\n=== Dataset Statistics ===")
     print(df["biased"].value_counts())
