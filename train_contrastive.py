@@ -164,13 +164,13 @@ def main():
                         help="Path to preprocessed CSV file")
     parser.add_argument('--mode', type=str, choices=['sentence', 'naive', 'contrastive', 'random'], default='sentence',
                         help="Input mode: sentence, naive, contrastive, or random")
-    parser.add_argument('--epochs', type=int, default=3, help="Number of training epochs")
-    parser.add_argument('--batch_size', type=int, default=64, help="Batch size")
+    parser.add_argument('--epochs', type=int, default=5, help="Number of training epochs")
+    parser.add_argument('--batch_size', type=int, default=16, help="Batch size")
     parser.add_argument('--lr', type=float, default=2e-5, help="Learning rate")
     parser.add_argument('--kfold', type=int, default=5, help="Number of folds for cross-validation")
-    parser.add_argument('--window_size', type=int, default=2, help="Window size for naive mode")
+    parser.add_argument('--window_size', type=int, default=1, help="Window size for naive mode")
     parser.add_argument('--top_k', type=int, default=2, help="Number of top contrastive sentences for contrastive modes")
-    parser.add_argument('--max_length', type=int, default=256, help="Max token length for BERT inputs")
+    parser.add_argument('--max_length', type=int, default=192, help="Max token length for BERT inputs")
     parser.add_argument('--output_dir', type=str, default='results', help="Directory to save results and errors")
     args = parser.parse_args()
 
