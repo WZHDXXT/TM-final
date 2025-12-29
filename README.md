@@ -57,6 +57,14 @@ The training script supports multiple context strategies:
 
 ---
 
+### Setup
+
+Before running any training commands, install the required dependencies:
+
+```bash
+pip install -r requirements.txt
+```
+
 ## Usage
 
 Run training with different context selection strategies by specifying the `mode` argument.
