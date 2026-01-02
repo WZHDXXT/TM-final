@@ -5,10 +5,19 @@ from sklearn.model_selection import GroupKFold
 from sklearn.metrics import precision_recall_fscore_support
 import torch
 from torch.utils.data import Dataset, DataLoader
-from transformers import BertTokenizer, BertForSequenceClassification
+from transformers import RobertaTokenizer, RobertaForSequenceClassification
 from torch.optim import AdamW
 from tqdm import tqdm
 import os
+import random
+
+def set_seed(seed=42):
+    random.seed(seed)
+    np.random.seed(seed)
+    torch.manual_seed(seed)
+    torch.cuda.manual_seed_all(seed)
+    torch.backends.cudnn.deterministic = True
+    torch.backends.cudnn.benchmark = False
 
 # dataset class
 class SentimentDataset(Dataset):
@@ -170,12 +179,12 @@ def main():
     parser.add_argument('--kfold', type=int, default=5, help="Number of folds for cross-validation")
     parser.add_argument('--window_size', type=int, default=1, help="Window size for naive mode")
     parser.add_argument('--top_k', type=int, default=2, help="Number of top contrastive sentences for contrastive modes")
-    parser.add_argument('--max_length', type=int, default=192, help="Max token length for BERT inputs")
+    parser.add_argument('--max_length', type=int, default=192, help="Max token length for inputs")
     parser.add_argument('--output_dir', type=str, default='results', help="Directory to save results and errors")
     args = parser.parse_args()
 
     os.makedirs(args.output_dir, exist_ok=True)
-
+    set_seed(42)
     # load data
     df = pd.read_csv(args.data_path)
 
@@ -185,7 +194,10 @@ def main():
             raise ValueError(f"Column '{col}' not found in data")
 
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
+    tokenizer = RobertaTokenizer.from_pretrained('roberta-base')
+    tokenizer.add_special_tokens(
+        {"additional_special_tokens": ["[TARGET]", "[CONTEXT]"]}
+    )
 
     gkf = GroupKFold(n_splits=args.kfold)
     articles = df['article_id']
@@ -216,7 +228,8 @@ def main():
         train_loader = DataLoader(train_dataset, batch_size=args.batch_size, shuffle=True)
         val_loader = DataLoader(val_dataset, batch_size=args.batch_size)
 
-        model = BertForSequenceClassification.from_pretrained('bert-base-uncased', num_labels=2)
+        model = RobertaForSequenceClassification.from_pretrained('roberta-base', num_labels=2)
+        model.resize_token_embeddings(len(tokenizer))
         model.to(device)
 
         optimizer = AdamW(model.parameters(), lr=args.lr)

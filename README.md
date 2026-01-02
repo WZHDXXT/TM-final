@@ -5,13 +5,6 @@ We investigate whether **relative sentiment differences between sentences within
 
 ---
 
-## Motivation
-
-Prior work on sentence-level media bias detection often relies on complex discourse structures, event graphs, or dataset-specific annotations.  
-In contrast, this project focuses on a **lightweight, sentence-centric formulation**, asking whether minimal contextual information—captured through sentiment contrast—is sufficient for bias prediction.
-
----
-
 ## Data Preparation
 
 Model inputs are generated through a **prior analysis step**, which computes sentence-level sentiment scores and attaches them to the dataset.
@@ -27,10 +20,6 @@ The preprocessing scripts produce the following files:
 - `biasedsents_sentiment_analysis.csv`
 
 These CSV files are **generated in advance** and are directly consumed by the training script.  
-No sentiment computation or contrast extraction is performed during model training.
-
-The `sentiment` field is an auxiliary signal (e.g., VADER or TextBlob output) and is **not** a gold label.  
-It is used **only for selecting contextual sentences**, not for supervision.
 
 Datasets such as **BASIL** and **BiasedSents** are first converted into this format before training.
 
@@ -49,11 +38,19 @@ The training script supports multiple context strategies:
 
 ## Model and Training
 
-- Backbone: `bert-base-uncased`
+- Two backbones supported via separate scripts: BERT-base and RoBERTa-base.
 - Task: Binary classification (biased vs. unbiased)
 - Optimizer: AdamW
 - Evaluation metric: Precision, Recall, F1 (biased class)
 - Validation: Article-level *k*-fold cross-validation (GroupKFold)
+
+---
+
+### Backbone Selection
+
+The choice of encoder backbone is controlled by selecting the corresponding training script.  
+Use `train_contrastive_BERT.py` for BERT-base experiments and `train_contrastive_RoBERTa.py` for RoBERTa-base experiments.  
+All other experimental settings and arguments remain identical across both scripts.
 
 ---
 
@@ -65,29 +62,53 @@ Before running any training commands, install the required dependencies:
 pip install -r requirements.txt
 ```
 
+---
+
 ## Usage
 
 Run training with different context selection strategies by specifying the `mode` argument.
 
 ```bash
-# Sentence-only baseline (no context)
-python train_contrastive.py \
+# Sentence-only baseline (no context) using BERT
+python train_contrastive_BERT.py \
   --data_path data_analysis/basil_sentiment_analysis.csv \
   --mode sentence
 
-# Naive window-based context
-python train_contrastive.py \
+# Sentence-only baseline (no context) using RoBERTa
+python train_contrastive_RoBERTa.py \
+  --data_path data_analysis/basil_sentiment_analysis.csv \
+  --mode sentence
+
+# Naive window-based context using BERT
+python train_contrastive_BERT.py \
   --data_path data_analysis/basil_sentiment_analysis.csv \
   --mode naive 
 
-# Contrastive sentiment context (maximum sentiment contrast)
-python train_contrastive.py \
+# Naive window-based context using RoBERTa
+python train_contrastive_RoBERTa.py \
+  --data_path data_analysis/basil_sentiment_analysis.csv \
+  --mode naive 
+
+# Contrastive sentiment context (maximum sentiment contrast) using BERT
+python train_contrastive_BERT.py \
   --data_path data_analysis/basil_sentiment_analysis.csv \
   --mode contrastive \
   --top_k 2
 
-# Randomly sampled context (control baseline)
-python train_contrastive.py \
+# Contrastive sentiment context (maximum sentiment contrast) using RoBERTa
+python train_contrastive_RoBERTa.py \
+  --data_path data_analysis/basil_sentiment_analysis.csv \
+  --mode contrastive \
+  --top_k 2
+
+# Randomly sampled context (control baseline) using BERT
+python train_contrastive_BERT.py \
+  --data_path data_analysis/basil_sentiment_analysis.csv \
+  --mode random \
+  --top_k 2
+
+# Randomly sampled context (control baseline) using RoBERTa
+python train_contrastive_RoBERTa.py \
   --data_path data_analysis/basil_sentiment_analysis.csv \
   --mode random \
   --top_k 2
